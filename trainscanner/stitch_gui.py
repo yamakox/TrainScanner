@@ -119,7 +119,8 @@ class StitcherUI(QDialog):
         self.thread_invoker.emit()
 
         self.scrollArea.setWidget(self.largecanvas)
-        self.scrollArea.setMinimumHeight(500) #self.largecanvas.sizeHint().height())
+        self.scrollArea.setMinimumHeight(400) #self.largecanvas.sizeHint().height())
+        self.scrollArea.setMinimumWidth(1000)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.btnStop = QPushButton('Stop')

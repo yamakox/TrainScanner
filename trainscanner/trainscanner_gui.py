@@ -672,8 +672,8 @@ class SettingsGUI(QWidget):
 
         stitcher = stitch_gui.StitcherUI(argv, False)
         file_name = stitcher.stitcher.outfilename
-        stitcher.setMaximumHeight(500)
-        stitcher.showMaximized()
+        #stitcher.setMaximumHeight(500)
+        #stitcher.showMaximized()
         stitcher.exec()
         stitcher = None
 
