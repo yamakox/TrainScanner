@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "trainscanner"
-version = "0.23.1"
+version = "0.24.2"
 homepage = "https://github.com/vitroid/trainscanner"
 description = ""
 authors = ["vitroid <vitroid@gmail.com>"]
@@ -12,7 +12,6 @@ python = "^3.11"
 TiledImage = "^0.1.1"
 PyQt6 = "^6.7.1"
 opencv-python-headless = "^4.10.0.84"
-click = "^8.1.8"
 tqdm = "^4.67.1"
 pillow = "^11.2.1"
 
@@ -26,8 +25,8 @@ rectify             = 'trainscanner.converter.rect:main'
 helicify            = 'trainscanner.converter.helix:main'
 hansify             = 'trainscanner.converter.hans_style:main'
 ts_converter        = 'trainscanner.converter.gui:main'
-movify              = 'trainscanner.converter.scroll:main'
-movify2             = 'trainscanner.converter.movie2:main'
+scrollify           = 'trainscanner.converter.scroll:main'
+movify              = 'trainscanner.converter.movie:main'
 
 [tool.poetry.group.dev.dependencies]
 jinja2 = "^3.1.6"

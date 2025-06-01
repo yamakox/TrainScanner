@@ -3,10 +3,11 @@
 
 import cv2
 import numpy as np
-import click
+import argparse
+from trainscanner.i18n import tr, init_translations
 
 
-def rectify(img, rows=None, gap=3, head_right=True):  # gap in percent
+def rectify(img, rows=None, overlap=3, head_right=True):  # overlap in percent
     h, w = img.shape[0:2]
 
     if rows is not None:
@@ -16,12 +17,12 @@ def rectify(img, rows=None, gap=3, head_right=True):  # gap in percent
         hh = h * rows
         ww = w // rows
         # while hh*2**0.5*(100+gap)/100 < ww:
-        while hh * 1.2 * (100 + gap) / 100 > ww:
+        while hh * 1.2 * (100 + overlap) / 100 > ww:
             rows -= 1
             hh = h * rows
             ww = w // rows
 
-    hg = h * (100 + gap) // 100
+    hg = h * (100 + overlap) // 100
     canvas = np.zeros((hg * rows, ww, 3))
     canvas[:, :, :] = 255  # white
     for i in range(rows):
@@ -37,22 +38,46 @@ def rectify(img, rows=None, gap=3, head_right=True):  # gap in percent
     return canvas
 
 
-@click.command()
-@click.argument("image_path")
-@click.option("--output", "-o", help="出力ファイルのパス")
-@click.option("--rows", "-r", type=int, default=None, help="行数")
-@click.option("--gap", "-g", type=int, default=0, help="マージン")
-@click.option("--head-right", "-R", is_flag=True, help="右端が先頭")
-def main(image_path, output, rows, gap, head_right):
+def get_parser():
     """
-    Fold a train image into a stack of images
+    コマンドライン引数のパーサーを生成して返す関数
     """
-    img = cv2.imread(image_path)
-    canvas = rectify(img, rows, gap, head_right)
-    if output:
-        cv2.imwrite(output, canvas)
+    parser = argparse.ArgumentParser(
+        description=tr("Fold a train image into a stack of images")
+    )
+    parser.add_argument("image_path", help=tr("Path of the input image file"))
+    parser.add_argument("--output", "-o", help=tr("Path of the output file"))
+    parser.add_argument(
+        "--rows", "-r", type=int, help=tr("Number of rows") + "-- 2,100"
+    )
+    parser.add_argument(
+        "--overlap",
+        "-l",
+        type=int,
+        default=0,
+        help=tr("Overlap (percent)") + "-- 0,100",
+    )
+    parser.add_argument(
+        "--head-right",
+        "-R",
+        action="store_true",
+        help=tr("The train heads to the right."),
+    )
+    return parser
+
+
+def main():
+    init_translations()
+
+    parser = get_parser()
+    args = parser.parse_args()
+
+    img = cv2.imread(args.image_path)
+    canvas = rectify(img, args.rows, args.overlap, args.head_right)
+    if args.output:
+        cv2.imwrite(args.output, canvas)
     else:
-        cv2.imwrite(f"{image_path}.rect.png", canvas)
+        cv2.imwrite(f"{args.image_path}.rect.png", canvas)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 from PIL import Image
 import subprocess
-import click
+import argparse
 import sys
+from trainscanner.i18n import tr, init_translations
 
 
 def make_movie(
@@ -58,7 +59,7 @@ def make_movie(
         f"-i '{image_path}'",
         f"-vf scale={virtual_width}:{movie_h},crop={movie_w}:{movie_h}:{scroll_expression}:0",
         "-pix_fmt yuv420p",
-        f"-b:v {bitrate}" if bitrate else "",
+        f"-b:v {bitrate}M" if bitrate else "",
         f"-c:v {encoder}",
         f"-t {duration}",
         f"'{output}'",
@@ -69,24 +70,72 @@ def make_movie(
     subprocess.run(cmd, shell=True)
 
 
-@click.command()
-@click.argument("image_path")
-@click.option("--output", "-o", help="出力ファイルのパス")
-@click.option("--duration", "-d", type=float, help="動画の長さ（秒）")
-@click.option("--height", "-h", type=int, default=1080, help="目標の高さ")
-@click.option("--width", "-w", type=int, default=1920, help="目標の幅")
-@click.option("--head-right", "-R", is_flag=True, help="右端が先頭")
-@click.option("--fps", "-r", type=int, default=30, help="フレームレート")
-@click.option("--bitrate", "-b", type=int, default=None, help="ビットレート")
-@click.option("--encoder", "-e", type=str, default="libx264", help="mp4エンコーダー")
-def main(
-    image_path, head_right, output, duration, height, width, fps, bitrate, encoder
-):
+def get_parser():
     """
-    Make a movie from a train image
+    コマンドライン引数のパーサーを生成して返す関数
     """
+    parser = argparse.ArgumentParser(description=tr("Make a movie from a train image"))
+    parser.add_argument("image_path", help=tr("Path of the input image file"))
+    parser.add_argument("--output", "-o", help=tr("Path of the output file"))
+    parser.add_argument(
+        "--duration",
+        "-d",
+        type=float,
+        default=8,
+        help=tr("Duration of the movie (seconds)") + "-- 0.1,1000",
+    )
+    parser.add_argument(
+        "--height",
+        "-H",
+        type=int,
+        default=1080,
+        help=tr("Height of the movie (pixels)") + "-- 100,4096",
+    )
+    parser.add_argument(
+        "--width",
+        "-W",
+        type=int,
+        default=1920,
+        help=tr("Width of the movie (pixels)") + "-- 100,4096",
+    )
+    parser.add_argument(
+        "--head-right",
+        "-R",
+        action="store_true",
+        help=tr("The train heads to the right."),
+    )
+    parser.add_argument(
+        "--fps", "-r", type=int, default=30, help=tr("Frame rate") + "-- 1,120"
+    )
+    parser.add_argument(
+        "--bitrate",
+        "-b",
+        type=float,
+        default=8,
+        help=tr("Bitrate (Mbit/s)") + "-- 0.1,100",
+    )
+    parser.add_argument(
+        "--encoder", "-e", type=str, default="libx264", help=tr("mp4 encoder")
+    )
+    return parser
+
+
+def main():
+    init_translations()
+
+    parser = get_parser()
+    args = parser.parse_args()
+
     make_movie(
-        image_path, head_right, output, duration, height, width, fps, bitrate, encoder
+        args.image_path,
+        args.head_right,
+        args.output,
+        args.duration,
+        args.height,
+        args.width,
+        args.fps,
+        args.bitrate,
+        args.encoder,
     )
 
 

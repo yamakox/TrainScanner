@@ -3,32 +3,38 @@
 
 import cv2
 import numpy as np
-import click
+import argparse
+from trainscanner.i18n import tr, init_translations
+import logging
+import os
 
 
-def hansify(img, head_right=True, rows=0, overlap=10):
+def hansify(img, head_right=True, aspect=2**0.5, overlap=10, width=0):
     """
     Hans Ruijter's style
     """
-    h, w = img.shape[0:2]
+    h, w = img.shape[:2]
 
-    if rows == 0:
-        # canvasの形状が3:2に近くなるように行数を計算
-        # w/N:h*N = 3:2
-        # 3hN = 2w/N
-        # NN = 2w/3h
-        # N = sqrt(2w/3h)
-        rows = int(np.sqrt(2 * w / 3 / h) + 0.5)
+    a = [999]
+    for rows in range(1, 100):
+
+        hh = h * rows
+        # ====+         ww1 = ww + A
+        #   +====+     ww  = ww
+        #       +===== ww1 = ww + A
+        # ww1 + (rows-2)*ww + ww1 = = ww*rows+2A = w
+        # ww*overlap/100 = A
+        # So, ww*(rows+overlap/50) = w
+
+        ww = int(w / (rows + overlap / 50))
+        a.append(np.abs(ww / hh - aspect))
+
+    rows = np.argmin(a)
+    print(rows)
 
     hh = h * rows
-    # ====+         ww1 = ww + A
-    #   +====+     ww  = ww
-    #       +===== ww1 = ww + A
-    # ww1 + (rows-2)*ww + ww1 = = ww*rows+2A = w
-    # ww*overlap/100 = A
-    # So, ww*(rows+overlap/50) = w
-
     ww = int(w / (rows + overlap / 50))
+
     A = ww * overlap // 100
 
     neww = ww + 2 * A
@@ -46,25 +52,72 @@ def hansify(img, head_right=True, rows=0, overlap=10):
             canvas[thh + i * h : thh + (i + 1) * h, 0:neww, :] = img[
                 :, i * ww : (i + 1) * ww + 2 * A, :
             ]
-    return canvas
-
-
-@click.command()
-@click.argument("image_path")
-@click.option("--output", "-o", help="出力ファイルのパス")
-@click.option("--rows", "-r", type=int, default=0, help="行数 (0で自動)")
-@click.option("--overlap", "-l", type=int, default=5, help="重複率")
-@click.option("--head-right", "-R", is_flag=True, help="右端が先頭")
-def main(image_path, output, rows, overlap, head_right):
-    """
-    Fold a train image into a stack of images like Hans Ruijter's style
-    """
-    img = cv2.imread(image_path)
-    canvas = hansify(img, head_right, rows, overlap)
-    if output:
-        cv2.imwrite(output, canvas)
+    if width > 0:
+        height = int((hh + thh) / neww * width)
+        return cv2.resize(canvas, (width, height), interpolation=cv2.INTER_CUBIC)
     else:
-        cv2.imwrite(f"{image_path}.hans.png", canvas)
+        return canvas
+
+
+def get_parser():
+    """
+    コマンドライン引数のパーサーを生成して返す関数
+    """
+    parser = argparse.ArgumentParser(
+        description=tr(
+            "Fold a train image into a stack of images like Hans Ruijter's style"
+        )
+    )
+    parser.add_argument("image_path", help=tr("Path of the input image file"))
+    parser.add_argument("--output", "-o", help=tr("Path of the output file"))
+    parser.add_argument(
+        "--aspect",
+        "-a",
+        type=float,
+        default=2**0.5,
+        help=tr("Aspect ratio") + "-- 0.1,10",
+    )
+    parser.add_argument(
+        "--overlap",
+        "-l",
+        type=int,
+        default=5,
+        help=tr("Overlap rate (percent)") + "-- 0,100",
+    )
+    parser.add_argument(
+        "--head-right",
+        "-R",
+        action="store_true",
+        help=tr("The train heads to the right."),
+    )
+    parser.add_argument(
+        "--width",
+        "-W",
+        type=int,
+        default=0,
+        help=tr("Width (pixels, 0 for original image size)") + "-- 0,10000",
+    )
+    return parser
+
+
+def main():
+    # デバッグ出力を設定
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger()
+    logger.debug(f"LANG environment variable: {os.environ.get('LANG', '')}")
+
+    # 翻訳を初期化
+    init_translations()
+
+    parser = get_parser()
+    args = parser.parse_args()
+
+    img = cv2.imread(args.image_path)
+    canvas = hansify(img, args.head_right, args.aspect, args.overlap, args.width)
+    if args.output:
+        cv2.imwrite(args.output, canvas)
+    else:
+        cv2.imwrite(f"{args.image_path}.hans.png", canvas)
 
 
 if __name__ == "__main__":

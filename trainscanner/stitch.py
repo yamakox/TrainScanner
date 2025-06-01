@@ -14,6 +14,7 @@ from logging import getLogger, basicConfig, WARN, DEBUG, INFO
 from tiledimage import cachedimage as ci
 from trainscanner import trainscanner
 from trainscanner import video
+from trainscanner.i18n import init_translations, tr
 
 
 class AlphaMask:
@@ -146,6 +147,9 @@ class Stitcher:
 
     def __init__(self, argv):
         logger = getLogger()
+
+        init_translations()
+
         parser = prepare_parser()
         # これが一番スマートなんだが、動かないので、手動で--fileをさがして処理を行う。
         # parser.add_argument('--file', type=open, action=LoadFromFile)
@@ -236,7 +240,8 @@ class Stitcher:
                     locations.append(cols)
         self.locations = locations
         self.total_frames = len(locations)
-        # self.alphas = dict()
+        if len(locations) == 0:
+            return
         # initial seek
         while self.currentFrame + 1 < self.locations[0][0]:
             logger.debug((self.currentFrame, self.locations[0][0]))
@@ -275,6 +280,8 @@ class Stitcher:
             yield self.getProgress()
 
     def _onestep(self):
+        if len(self.locations) == 0:
+            return False
         while self.currentFrame + 1 < self.locations[0][0]:
             self.currentFrame = self.vl.skip()
             if self.currentFrame == 0:

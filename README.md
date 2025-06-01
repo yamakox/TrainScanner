@@ -1,6 +1,6 @@
 ![Banner](https://farm6.staticflickr.com/5763/30971813460_37996db7bb_o_d.jpg)
 
-Version 0.23.1
+Version 0.24.2
 
 # TrainScanner の使い方
 
@@ -31,7 +31,7 @@ TrainScanner で作成した画像は巨大でしかも長大なので、その�
 ts_converter
 ```
 
-これは、次節のコマンドのラッパーです。細かいオプションを利用したい場合はコマンドを利用して下さい。
+これは、次節のコマンドに GUI を付与したものです。
 
 ## コマンドラインからの利用
 
@@ -44,15 +44,22 @@ helicify longimage.png
 ```
 
 ```
-Usage: helicify [OPTIONS] IMAGE_PATH
+usage: helix.py [-h] [--output OUTPUT] [--margin MARGIN] [--aspect ASPECT]
+                image_path
 
-  Make a helical strip from a train image
+らせん画像を作る
 
-Options:
-  -o, --output TEXT   出力ファイルのパス
-  -m, --margin FLOAT  マージン
-  -a, --aspect FLOAT  アスペクト比
-  --help              Show this message and exit.
+positional arguments:
+  image_path            入力ファイルのパス
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --margin MARGIN, -m MARGIN
+                        マージン (pixel)-- 0,100
+  --aspect ASPECT, -a ASPECT
+                        アスペクト比-- 0.1,10
 
 ```
 
@@ -65,17 +72,24 @@ rectify longimage.png
 ```
 
 ```
-Usage: rectify [OPTIONS] IMAGE_PATH
+usage: rect.py [-h] [--output OUTPUT] [--rows ROWS] [--overlap OVERLAP]
+               [--head-right]
+               image_path
 
-  Fold a train image into a stack of images
+ぶつ切り山積み
 
-Options:
-  -o, --output TEXT   出力ファイルのパス
-  -r, --rows INTEGER  行数
-  -g, --gap INTEGER   マージン
-  -R, --head-right    右端が先頭
-  --help              Show this message and exit.
-}}
+positional arguments:
+  image_path            入力ファイルのパス
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --rows ROWS, -r ROWS  段数-- 2,100
+  --overlap OVERLAP, -l OVERLAP
+                        端の重複部分の幅 (パーセント)-- 0,100
+  --head-right, -R      列車は右向きに進む
+
 ```
 
 ### `filmify`: 長い写真をフィルム風にするツール
@@ -87,15 +101,21 @@ filmify longimage.png
 ```
 
 ```
-Usage: filmify [OPTIONS] IMAGE_PATH
+usage: film.py [-h] [--output OUTPUT]
+               [--creative_commons_sign CREATIVE_COMMONS_SIGN]
+               image_path
 
-  Add film perforations to the image
+Add film perforations to the image
 
-Options:
-  -o, --output TEXT               出力ファイルのパス
-  -c, --creative_commons_sign TEXT
-                                  Creative Commons sign
-  --help                          Show this message and exit.
+positional arguments:
+  image_path            入力画像ファイルのパス
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --creative_commons_sign CREATIVE_COMMONS_SIGN, -c CREATIVE_COMMONS_SIGN
+                        Creative Commons sign
 
 ```
 
@@ -108,71 +128,105 @@ hansify longimage.png
 ```
 
 ```
-Usage: hansify [OPTIONS] IMAGE_PATH
+usage: hans_style.py [-h] [--output OUTPUT] [--aspect ASPECT]
+                     [--overlap OVERLAP] [--head-right] [--width WIDTH]
+                     image_path
 
-  Fold a train image into a stack of images like Hans Ruijter's style
+Fold a train image into a stack of images like Hans Ruijter's style
 
-Options:
-  -o, --output TEXT      出力ファイルのパス
-  -r, --rows INTEGER     行数 (0で自動)
-  -l, --overlap INTEGER  重複率
-  -R, --head-right       右端が先頭
-  --help                 Show this message and exit.
+positional arguments:
+  image_path            入力ファイルのパス
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --aspect ASPECT, -a ASPECT
+                        アスペクト比-- 0.1,10
+  --overlap OVERLAP, -l OVERLAP
+                        端の重複部分の幅 (パーセント)-- 0,100
+  --head-right, -R      列車は右向きに進む
+  --width WIDTH, -W WIDTH
+                        画像の幅 (ピクセル, 変更しないなら0)-- 0,10000
 
 ```
 
-### `movify`: スクロール動画を生成するツール
+### `scrollify`: スクロール動画を生成するツール
 
 一定速度でスクロールする動画を生成します。
+
+```shell
+scrollify longimage.png
+```
+
+```
+usage: scroll.py [-h] [--output OUTPUT] [--duration DURATION]
+                 [--height HEIGHT] [--width WIDTH] [--head-right] [--fps FPS]
+                 [--bitrate BITRATE] [--encoder ENCODER]
+                 image_path
+
+列車の長い写真からムービーを作る
+
+positional arguments:
+  image_path            入力ファイルのパス
+
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --duration DURATION, -d DURATION
+                        ムービーの尺 (秒)-- 0.1,1000
+  --height HEIGHT, -H HEIGHT
+                        ムービーの高さ (pixels)-- 100,4096
+  --width WIDTH, -W WIDTH
+                        ムービーの幅 (pixels)-- 100,4096
+  --head-right, -R      列車は右向きに進む
+  --fps FPS, -r FPS     フレームレート (fps)-- 1,120
+  --bitrate BITRATE, -b BITRATE
+                        ビットレート (Mbit/s)-- 0.1,100
+  --encoder ENCODER, -e ENCODER
+                        mp4エンコーダ
+
+```
+
+### `movify`: サムネイル付きスクロール動画を生成するツール
+
+[@yamakox](https://x.com/yamakox)さん風のスクロール動画を生成します。
 
 ```shell
 movify longimage.png
 ```
 
 ```
-Usage: movify [OPTIONS] IMAGE_PATH
+usage: movie.py [-h] [--output OUTPUT] [--duration DURATION] [--height HEIGHT]
+                [--width WIDTH] [--head-right] [--fps FPS] [--bitrate BITRATE]
+                [--png] [--alternating] [--accel] [--encoder ENCODER]
+                image_path
 
-  Make a movie from a train image
+サムネイル付きのムービーを生成(Yamako式)
 
-Options:
-  -o, --output TEXT      出力ファイルのパス
-  -d, --duration FLOAT   動画の長さ（秒）
-  -h, --height INTEGER   目標の高さ
-  -w, --width INTEGER    目標の幅
-  -R, --head-right       右端が先頭
-  -r, --fps INTEGER      フレームレート
-  -b, --bitrate INTEGER  ビットレート
-  -e, --encoder TEXT     mp4エンコーダー
-  --help                 Show this message and exit.
+positional arguments:
+  image_path            入力ファイルのパス
 
-```
-
-### `movify2`: スクロール動画を生成するツール 2
-
-[@yamakox](https://x.com/yamakox)さん風のスクロール動画を生成します。
-
-```shell
-movify2 longimage.png
-```
-
-```
-Usage: movify2 [OPTIONS] IMAGE_PATH
-
-  Make a movie with a thumbnailfrom a train image
-
-Options:
-  -o, --output TEXT      出力ファイルのパス
-  -d, --duration FLOAT   動画の長さ（秒）
-  -h, --height INTEGER   目標の高さ
-  -w, --width INTEGER    目標の幅
-  -R, --head-right       右端が先頭
-  -r, --fps INTEGER      フレームレート
-  -b, --bitrate INTEGER  ビットレート
-  -p, --png              中間ファイルをpngにする
-  -a, --alternating      前進+後退
-  -A, --accel            加速
-  -e, --encoder TEXT     mp4エンコーダー
-  --help                 Show this message and exit.
+options:
+  -h, --help            show this help message and exit
+  --output OUTPUT, -o OUTPUT
+                        出力ファイルのパス
+  --duration DURATION, -d DURATION
+                        ムービーの尺 (秒)-- 0.1,1000
+  --height HEIGHT, -H HEIGHT
+                        ムービーの高さ (pixels)-- 100,4096
+  --width WIDTH, -W WIDTH
+                        ムービーの幅 (pixels)-- 100,4096
+  --head-right, -R      列車は右向きに進む
+  --fps FPS, -r FPS     フレームレート (fps)-- 1,120
+  --bitrate BITRATE, -b BITRATE
+                        ビットレート (Mbit/s) -- 0.1,100
+  --png, -p             高画質な中間ファイル
+  --alternating, -a     行ったり来たり
+  --accel, -A           加速
+  --encoder ENCODER, -e ENCODER
+                        mp4エンコーダ
 
 ```
 
