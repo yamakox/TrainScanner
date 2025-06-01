@@ -10,7 +10,9 @@ from pathlib import Path
 from PIL import Image
 import numpy as np
 import cv2
+from logging import getLogger
 
+logger = getLogger()
 _supported_extensions = [".txt", ".lst"]
 
 def is_supported(filename:str):
@@ -27,19 +29,27 @@ def is_supported(filename:str):
 
 class VideoLoader(object):
     def __init__(self, filename):
-        with open(filename, "r") as f:
-            fl = f.readlines()
-            self.file_list = [Path(filename).parent / i.rstrip() for i in fl]
         self.nframe = 0
+        self.file_list = []
+        try:
+            with open(filename, "r") as f:
+                lines = f.readlines()
+                self.file_list = [Path(filename).parent / i.rstrip() for i in lines]
+        except Exception as e:
+            logger.error(f"Error loading the image catalog file: {filename}: {e}")
 
     def next(self):
         if self.nframe >= len(self.file_list):
             return 0, None
-        img = Image.open(self.file_list[self.nframe])
-        frame = np.asarray(img)
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        self.nframe += 1
-        return self.nframe, frame
+        try:
+            img = Image.open(self.file_list[self.nframe])
+            frame = np.asarray(img)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            self.nframe += 1
+            return self.nframe, frame
+        except Exception as e:
+            logger.error(f"Error loading the image file: {self.file_list[self.nframe]}: {e}")
+            return 0, None
 
     def skip(self):
         if self.nframe >= len(self.file_list):
