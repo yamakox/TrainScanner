@@ -5,3 +5,5 @@
 *.tsconf
 *.m4v
 *.mp4
+*.txt
+*_images/

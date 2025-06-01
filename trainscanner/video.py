@@ -7,9 +7,11 @@ It does not fit the iterator framework.
 """
 
 import sys
-from trainscanner import video_cv2
+from trainscanner import video_cv2, video_img
 
 def VideoLoader(filename:str):
+    if video_img.is_supported(filename):
+        return video_img.VideoLoader(filename)
     ostype = sys.platform
     if ostype == "darwin":
         return video_cv2.VideoLoader(filename)

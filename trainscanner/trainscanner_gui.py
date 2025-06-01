@@ -405,7 +405,7 @@ class SettingsGUI(QWidget):
             self,
             self.tr("Open a movie file"),
             "",
-            "Movie files (*.mov *.mp4 *.m4v *.mts *.tsconf)",
+            "Movie files (*.mov *.mp4 *.m4v *.mts *.tsconf *.txt * .lst)",
         )
         logger.debug("File: {0}".format(filename))
         if filename == "":  # or if the file cannot be opened,
