@@ -491,7 +491,7 @@ class SettingsGUI(QWidget):
             self.editor.close()
         logger.debug("Let's select a file")
         filename, types = QFileDialog.getOpenFileName(self, self.tr('Open file'),
-            "","Movie files (*.mov *.mp4 *.m4v *.mts *.tsconf)")
+            "","Movie files (*.mov *.mp4 *.m4v *.mts *.tsconf *.txt * .lst)")
         logger.debug("File: {0}".format(filename))
         if filename == "": # or if the file cannot be opened,
             return

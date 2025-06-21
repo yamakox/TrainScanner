@@ -8,8 +8,11 @@ It does not fit the iterator framework.
 
 import importlib
 import sys
+from trainscanner import video_cv2, video_img
 
 def VideoLoader(filename):
+    if video_img.is_supported(filename):
+        return video_img.VideoLoader(filename)
     module = None
     ostype = sys.platform
     if ostype == "darwin":
