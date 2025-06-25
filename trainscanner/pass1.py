@@ -440,16 +440,16 @@ class Pass1():
             ##### Suppress drifting.
             if params.zero:
                 dy = 0
-            #直近5フレームの移動量を記録する．
+            #直近estimateフレームの移動量を記録する．
             deltax.append(dx)
             deltay.append(dy)
-            if len(deltax) > 5:
+            if len(deltax) > self.params.estimate:
                 deltax.pop(0)
                 deltay.pop(0)
-            #最大100フレームの画像を記録する．
+            #最大500フレームの画像を記録する．
             if cropped is not None and self.cache is not None:
                 self.cache.append([nframe, cropped])
-                if len(self.cache) > 100: #always keep 100 frames in self.cache
+                if len(self.cache) > 500: #always keep 500 frames in self.cache
                     self.cache.pop(0)
             ##### Make the preview image
             #preview = trainscanner.fit_to_square(cropped,preview_size)
@@ -464,15 +464,15 @@ class Pass1():
                 if not guess_mode:
                     #number of frames since the first motion is detected.
                     precount += 1
-                    #過去5フレームでの移動量の変化
+                    #過去estimateフレームでの移動量の変化
                     ddx = max(deltax) - min(deltax)
                     ddy = max(deltay) - min(deltay)
-                    #if the displacements are almost constant in the last 5 frames,
-                    if params.antishake <= ddx or params.antishake <= ddy:
+                    #if the displacements are almost constant in the last estimate frames,
+                    if (params.antishake <= ddx or params.antishake <= ddy) and len(self.cache) < 500:
                         logger.info("Wait ({0} {1} {2})".format(nframe,dx,dy))
                         continue
                     else:
-                        #速度は安定した．
+                        #速度は安定した、あるいはキャッシュが飽和した
                         guess_mode = True
                         #この速度を信じ，過去にさかのぼってもう一度マッチングを行う．
                         self.tspos = self._backward_match(absx, absy, dx, dy, precount)
