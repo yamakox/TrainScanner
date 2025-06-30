@@ -41,7 +41,7 @@ class VideoLoader(object):
         if self.nframe >= len(self.file_list):
             return 0, None
         try:
-            frame = cv2.imread(str(self.file_list[self.nframe]), cv2.IMREAD_UNCHANGED)
+            frame = cv2.imread(str(self.file_list[self.nframe]))
             self.nframe += 1
             return self.nframe, frame
         except Exception as e:
