@@ -7,7 +7,6 @@ It does not fit the iterator framework.
 """
 
 from pathlib import Path
-from PIL import Image
 import numpy as np
 import cv2
 from logging import getLogger
@@ -42,9 +41,7 @@ class VideoLoader(object):
         if self.nframe >= len(self.file_list):
             return 0, None
         try:
-            img = Image.open(self.file_list[self.nframe])
-            frame = np.asarray(img)
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            frame = cv2.imread(str(self.file_list[self.nframe]), cv2.IMREAD_UNCHANGED)
             self.nframe += 1
             return self.nframe, frame
         except Exception as e:
