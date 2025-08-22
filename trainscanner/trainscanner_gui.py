@@ -669,6 +669,10 @@ class SettingsGUI(QWidget):
         argv = ["stitch"]
         ## modified argv += [ "@"+logfilenamebase+".tsconf",]
         argv += [ "--file", logfilenamebase+".tsconf",]
+        if not os.path.exists(logfilenamebase+".tsconf"):
+            logger.error("Failed to generate "+logfilenamebase+".tsconf")
+            logger.error("Please check estimate parameter value.")
+            return
 
         stitcher = stitch_gui.StitcherUI(argv, False)
         file_name = stitcher.stitcher.outfilename
