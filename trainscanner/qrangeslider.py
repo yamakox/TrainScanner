@@ -220,13 +220,14 @@ class Handle(RangeSliderElement):
         setattr(self, '__mx', None)
 
     def mouseMoveEvent(self, event):
+        assert(event)
         #When the range is dragged
         event.accept()
         if self.vertical:
-            mx = event.globalY()
+            mx = int(event.globalPosition().y())
         else:
-            mx = event.globalX()
-        #last value
+            mx = int(event.globalPosition().x())
+         #last value
         _mx = getattr(self, '__mx', None)
 
         if not _mx:
