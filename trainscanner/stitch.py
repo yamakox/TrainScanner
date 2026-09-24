@@ -13,6 +13,7 @@ from logging import getLogger, basicConfig, WARN, DEBUG, INFO
 from tiledimage import cachedimage as ci
 from trainscanner import trainscanner
 from trainscanner import video
+import tifffile
 
 class AlphaMask():
     def __init__(self, img_width, slit=0, width=1.0):
@@ -128,8 +129,15 @@ class Stitcher():
             tsconfbase = os.path.basename(self.params.logbase)
             self.tsposfile = tsconfdir + "/" + tsconfbase + ".tspos"
         moviefile = tsconfdir + "/" + moviebase
-        self.outfilename = tsconfdir + "/" + tsconfbase + ".png"
-        self.cachedir    = tsconfdir + "/" + tsconfbase + ".pngs" #if required
+
+        vl = video.VideoLoader(moviefile)
+        nframe, frame = vl.next()
+        self.dtype = frame.dtype
+        del vl
+        logger.info("dtype  {0}".format(self.dtype.name))
+
+        self.outfilename = tsconfdir + "/" + tsconfbase + (".tif" if self.dtype == np.uint16 else ".png")
+        self.cachedir    = tsconfdir + "/" + tsconfbase + ".tifs" #if required
         if not os.path.exists(moviefile):
             moviefile = moviepath
         logger.info("TSPos  {0}".format(self.tsposfile))
@@ -255,7 +263,10 @@ class Stitcher():
         file_name = self.outfilename
         #It costs high when using the CachedImage.
         img       = self.canvas.get_image()
-        cv2.imwrite(file_name, img)
+        if file_name.endswith('.tif'):
+            tifffile.imwrite(file_name, cv2.cvtColor(img, cv2.COLOR_BGR2RGB), compression='deflate')
+        else:
+            cv2.imwrite(file_name, img)
 
 
 

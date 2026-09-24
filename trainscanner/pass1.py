@@ -58,7 +58,7 @@ def motion(image, ref, focus=(333, 666, 333, 666), maxaccel=0, delta=(0,0), anti
 
     # Apply template Matching
     if maxaccel == 0:
-        res = cv2.matchTemplate(image,template,cv2.TM_SQDIFF_NORMED)
+        res = cv2.matchTemplate(image.astype(np.float32),template.astype(np.float32),cv2.TM_SQDIFF_NORMED)
         #loc is given by x,y
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         return min_loc[0] - wmin, min_loc[1] - hmin
@@ -76,7 +76,7 @@ def motion(image, ref, focus=(333, 666, 333, 666), maxaccel=0, delta=(0,0), anti
         #    print(roix0,roix1,roiy0,roiy1,imagew,imageh)
         #    return None
         #crop = image[roiy0:roiy1, roix0:roix1, :]
-        res = cv2.matchTemplate(crop,template,cv2.TM_SQDIFF_NORMED)
+        res = cv2.matchTemplate(crop.astype(np.float32),template.astype(np.float32),cv2.TM_SQDIFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         #loc is given by x,y
 
@@ -86,7 +86,7 @@ def motion(image, ref, focus=(333, 666, 333, 666), maxaccel=0, delta=(0,0), anti
         roix12 = wmax + antishake
         roiy12 = hmax + antishake
         crop = image[roiy02:roiy12, roix02:roix12, :]
-        res = cv2.matchTemplate(crop,template,cv2.TM_SQDIFF_NORMED)
+        res = cv2.matchTemplate(crop.astype(np.float32),template.astype(np.float32),cv2.TM_SQDIFF_NORMED)
         min_val2, max_val2, min_loc2, max_loc2 = cv2.minMaxLoc(res)
         #loc is given by x,y
         if min_val <= min_val2:
@@ -102,7 +102,10 @@ def diffImage(frame1,frame2,dx,dy,focus=None,slitpos=None):
     affine = np.matrix(((1.0,0.0,dx),(0.0,1.0,dy)))
     h,w = frame1.shape[0:2]
     frame1 = cv2.warpAffine(frame1, affine, (w,h))
-    diff = 255 - cv2.absdiff(frame1,frame2)
+    if frame1.dtype == np.uint16:
+        diff = 65535 - cv2.absdiff(frame1,frame2)
+    else:
+        diff = 255 - cv2.absdiff(frame1,frame2)
     if focus is not None:
         draw_focus_area(diff, focus, delta=dx)
     if slitpos is not None:

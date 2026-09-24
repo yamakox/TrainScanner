@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QApplication, QSlider, QVBoxLayout, QWidget
 
 from trainscanner import qrangeslider as rs
 from trainscanner.imagebar import ImageBar
+import numpy as np
 
 
 class ImageSelector2(QWidget):
@@ -43,15 +44,12 @@ class ImageSelector2(QWidget):
 
 
 def cv2toQImage(cv2image):
-    """
-    It breaks the original image
-    """
-    import numpy as np
-    height, width = cv2image.shape[0:2]
-    tmp = cv2image[:,:,0].copy()
-    cv2image[:,:,0] = cv2image[:,:,2]
-    cv2image[:,:,2] = tmp
-    return QImage(cv2image.data, width, height, width*3, QImage.Format.Format_RGB888)
+    height,width = cv2image.shape[:2]
+    if cv2image.dtype == np.uint16:
+        _cv2image = (cv2image // 256).astype(np.uint8)
+    else:
+        _cv2image = cv2image
+    return QImage(_cv2image[:,:,::-1].copy().data, width, height, width*3, QImage.Format.Format_RGB888)
 
 
 

@@ -2,7 +2,7 @@
 
 import math
 import sys
-from logging import DEBUG, WARN, basicConfig, getLogger
+from logging import DEBUG, INFO, basicConfig, getLogger
 
 import cv2
 import numpy as np
@@ -68,7 +68,10 @@ class ExtensibleCanvasWidget(QLabel):
         #if self.count == 7:
         #    self.count = 0
         self.preview.put_image(pos, image)
-        fullimage = self.preview.get_image()[:,:,::-1].copy()  #reverse order
+        _fullimage = self.preview.get_image()
+        if _fullimage.dtype == np.uint16:
+            _fullimage = (_fullimage // 256).astype(np.uint8)
+        fullimage = _fullimage[:,:,::-1].copy()  #reverse order
         h,w = fullimage.shape[:2]
         self.resize(w, h)
         qimage = QImage(fullimage.data, w, h, w*3, QImage.Format.Format_RGB888)
@@ -86,7 +89,7 @@ class StitcherUI(QDialog):
         stitcher = stitch.Stitcher(argv=argv)
         tilesize = (128,512) #can be smaller for smaller machine
         cachesize = 10
-        stitcher.set_canvas(ci.CachedImage("new", dir=stitcher.cachedir, tilesize=tilesize, cachesize=cachesize))
+        stitcher.set_canvas(ci.CachedImage("new", dir=stitcher.cachedir, tilesize=tilesize, cachesize=cachesize, fileext='tif', dtype=stitcher.dtype))
         self.stitcher = stitcher
         #determine the shrink ratio to avoid too huge preview
         preview_ratio = 1.0

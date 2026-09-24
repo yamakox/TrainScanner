@@ -44,7 +44,7 @@ class Canvas():
         ymin = min(cymin,iymin)
         ymax = max(cymax,iymax)
         if (xmax-xmin, ymax-ymin) != (self._image.shape[1], self._image.shape[0]):
-            newcanvas = np.zeros((ymax-ymin, xmax-xmin,3), np.uint8)
+            newcanvas = np.zeros((ymax-ymin, xmax-xmin,3), self._image.dtype)
             newcanvas[cymin-ymin:cymax-ymin, cxmin-xmin:cxmax-xmin, :] = self._image[:,:,:]
         else:
             newcanvas = self._image

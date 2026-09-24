@@ -36,12 +36,14 @@ setup(name='TrainScanner',
         exclude=['trainscanner.i18n', ],
       ),
       install_requires=[# 'numpy==1.19.3',
-                        "tiledimage==0.1.1",
+                        "tiledimage@git+https://github.com/yamakox/TiledImage/@v0.1.1",
                         "scikit-video@git+https://github.com/scikit-video/scikit-video.git",
                         "scikit-build",
                         "videosequence",
                         "opencv-python-headless",
                         "pyqt6",
+                        "tifffile",
+                        "imagecodecs",
                         ],#'pyqt5', ], #cv2
       entry_points = {
               'console_scripts': [

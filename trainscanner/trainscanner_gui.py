@@ -74,6 +74,7 @@ class AsyncImageLoader(QObject):
         logger.debug("Open video: {0}".format(filename))
         self.vl = video.VideoLoader(filename)
         nframe, frame = self.vl.next()
+        self.dtype = frame.dtype
         if self.size:
             frame = trainscanner.fit_to_square(frame, self.size)
         self.snapshots = [frame]
@@ -623,6 +624,10 @@ class SettingsGUI(QWidget):
         logger = getLogger()
         if self.editor is None:
             return
+        _x0, _x1, _y0, _y1 = self.editor.focus
+        if (_x1 - _x0) * (_y1 - _y0) == 0:
+            logger.error("Please select focus area.")
+            return
         now = int(time.time()) % 100000
         logfilenamebase = self.filename+".{0}".format(now)
         stitch_options = []
@@ -934,7 +939,11 @@ class EditorGUI(QWidget):
 
     def cv2toQImage(self,cv2image):
         height,width = cv2image.shape[:2]
-        return QImage(cv2image[:,:,::-1].copy().data, width, height, width*3, QImage.Format.Format_RGB888)
+        if cv2image.dtype == np.uint16:
+            _cv2image = (cv2image // 256).astype(np.uint8)
+        else:
+            _cv2image = cv2image
+        return QImage(_cv2image[:,:,::-1].copy().data, width, height, width*3, QImage.Format.Format_RGB888)
 
 
     def show_snapshots(self, region=None):
