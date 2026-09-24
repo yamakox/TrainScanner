@@ -7,8 +7,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/trainscanner.x",
       "console": "integratedTerminal",
-      "justMyCode": false,
-      "cwd": "/Users/yamako/Pictures/TrainScanner/2026-08-03_DoctorYellow_T5_上り"
+      "justMyCode": false
     }
   ]
 }
